@@ -1,0 +1,16 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# Environments
+.env
+.env.*
+
+# Poetry
+poetry.lock
+*.egg-info/
+*.dist-info/
+
+# VSCode and OS
+.vscode/
+.DS_Store

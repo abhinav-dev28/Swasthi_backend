@@ -1,0 +1,41 @@
+[tool.poetry]
+name = "swasthi-backend"
+version = "0.1.0"
+description = ""
+authors = ["abhinav-dev28 <abhinav.maurya@fitnearn.com>"]
+readme = "README.md"
+packages = [
+    { include = "src" },
+    { include = "scripts" }
+]
+# optional: disable packaging if you don't plan to publish this as a pip package
+# package-mode = false
+
+[tool.poetry.dependencies]
+python = ">=3.13"
+fastapi = "^0.115.0"
+uvicorn = { extras = ["standard"], version = "^0.34.0" }
+python-dotenv = "^1.1.0"
+sqlmodel = "^0.0.24"
+asyncpg = "^0.30.0"
+boto3 = "^1.38.0"
+alembic = "^1.16.0"
+pydantic-settings = "^2.9.1"
+psycopg2-binary = "^2.9.10"
+
+[tool.poetry.group.dev.dependencies]
+black = "^25.1.0"
+isort = "^6.0.1"
+
+[tool.poetry.scripts]
+dev = "scripts.dev:start"
+
+[tool.black]
+line-length = 88
+
+[tool.isort]
+profile = "black"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
