@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     pg_host: str
     pg_port: int
     pg_db: str
+    port: int = 8000
 
     class Config:
         env_file = ".env"

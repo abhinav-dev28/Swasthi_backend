@@ -9,7 +9,6 @@ from src.config.settings import settings
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("🔄 Starting up...")
-    # print("DB URL:", settings.database_url)
     init_db()  # Create tables
     yield
     print("🛑 Shutting down...")
