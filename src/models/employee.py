@@ -1,5 +1,5 @@
 from sqlmodel import SQLModel, Field
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 # class EmployeeBase(SQLModel):
@@ -13,7 +13,7 @@ class Employee(SQLModel, table=True):
     name: str = Field(index=True, max_length=100)
     position: str = Field(index=True, max_length=50)
     salary: float = Field(ge=0, description="Salary must be a non-negative number")
-    created_at: datetime = Field(default_factory=datetime.now)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 # class EmployeeCreate(EmployeeBase):

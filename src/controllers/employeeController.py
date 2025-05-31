@@ -3,6 +3,7 @@ from src.config.connection import engine
 from sqlmodel import Session, select
 from fastapi import HTTPException, status
 from fastapi.responses import JSONResponse
+from src.utils.response import standard_response as standard
 
 
 def addEmployee(data: Employee):
@@ -12,17 +13,16 @@ def addEmployee(data: Employee):
             session.add(employee)
             session.commit()
             session.refresh(employee)
-            return JSONResponse(
+            return standard(
                 status_code=status.HTTP_201_CREATED,
-                content={
-                    "success": True,
-                    "message": "Employee Added",
-                    "data": employee,  # ✅ FIXED
-                },
+                success=True,
+                message="Employee Added",
+                data=employee,
             )
+
     except Exception as e:
         return JSONResponse(
-            status_code=status.e.status_code,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={
                 "success": False,
                 "message": f"An error occurred while adding the employee: {str(e)}",
@@ -34,7 +34,6 @@ def updateEmployee(id: int, data: Employee):
     try:
         with Session(engine) as session:
             employee = session.get(Employee, id)
-            print("Employee fetched:", employee)
 
             if not employee:
                 return JSONResponse(
@@ -52,13 +51,11 @@ def updateEmployee(id: int, data: Employee):
             session.commit()
             session.refresh(employee)
 
-            return JSONResponse(
+            return standard(
                 status_code=status.HTTP_200_OK,
-                content={
-                    "success": True,
-                    "message": "Employee Updated",
-                    "data": employee,  # ✅ FIXED
-                },
+                success=True,
+                message="Employee Updated",
+                data=employee,
             )
 
     except HTTPException as e:
@@ -76,16 +73,22 @@ def getAllEmployees():
         with Session(engine) as session:
             statement = select(Employee)
             results = session.exec(statement).all()
+
             if not results:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    data="No employees found",
+                return standard(
+                    status_code=404, success=False, message="No employees found"
                 )
-            return {"success": True, "message": "List of employees", "data": results}
-    except HTTPException as e:
-        raise HTTPException(
-            status_code=e.status_code,
-            detail=e.detail,
+
+            return standard(
+                status_code=200,
+                success=True,
+                message="List of employees",
+                data=results,
+                # data=[emp.model_dump() for emp in results],
+            )
+    except Exception as e:
+        return standard(
+            status_code=500, success=False, message=f"Something went wrong: {str(e)}"
         )
 
 
@@ -94,21 +97,18 @@ def getEmployee(id: int):
         with Session(engine) as session:
             employee = session.get(Employee, id)
             if not employee:
-                return JSONResponse(
+                return standard(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    content={
-                        "success": False,
-                        "message": "Employee Not found",
-                    },
+                    success=False,
+                    message="Employee not found",
                 )
-            return JSONResponse(
+            return standard(
                 status_code=status.HTTP_200_OK,
-                content={
-                    "success": True,
-                    "message": "Employee fetched",
-                    "data": employee,
-                },
+                success=True,
+                message="Employee found",
+                data=employee,
             )
+
     except HTTPException as e:
         return JSONResponse(
             status_code=e.status_code,
