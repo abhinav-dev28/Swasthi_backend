@@ -13,3 +13,6 @@ poetry.lock
 # VSCode and OS
 .vscode/
 .DS_Store
+
+.venv/
+venv/

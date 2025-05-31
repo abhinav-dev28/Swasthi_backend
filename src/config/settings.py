@@ -5,6 +5,7 @@ load_dotenv(override=True)  # ✅ This forces .env to override system env
 
 
 class Settings(BaseSettings):
+    database_url: str
     pg_user: str
     pg_password: str
     pg_host: str
@@ -14,20 +15,6 @@ class Settings(BaseSettings):
 
     class Config:
         env_file = ".env"
-
-    @property
-    def db_url(self):
-        from sqlalchemy.engine import URL
-
-        return URL.create(
-            drivername="postgresql+psycopg2",
-            username=self.pg_user,
-            password=self.pg_password,
-            host=self.pg_host,
-            port=self.pg_port,
-            database=self.pg_db,
-            query={"sslmode": "require"},
-        )
 
 
 settings = Settings()

@@ -1,8 +1,18 @@
 from sqlmodel import SQLModel, create_engine
 from src.config.settings import settings
 
-engine = create_engine(settings.db_url, echo=True)
-print("Database engine created with URL:", settings.db_url)
+connection_string: str = str(settings.database_url).replace(
+    "postgres", "postgresql+psycopg2"
+)
+
+engine = create_engine(
+    connection_string,
+    connect_args={"sslmode": "require"},
+    pool_recycle=300,
+    pool_size=5,
+    echo=True,
+)
+print("Database engine created with URL:", settings.database_url)
 
 
 def init_db():

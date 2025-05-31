@@ -1,12 +1,12 @@
 from src.controllers import userController
 from fastapi import APIRouter
-from src.models.employee import Employee, EmployeeCreate, EmployeeUpdate
+from src.models.employee import Employee
 from src.controllers import employeeController as controller
 from pydantic import BaseModel
 from typing import Generic, TypeVar, Optional, List
 from pydantic.generics import GenericModel
 
-router = APIRouter(prefix="/users", tags=["Users"])
+router = APIRouter(prefix="/employee", tags=["Employee"])
 
 T = TypeVar("T")
 
@@ -17,13 +17,8 @@ class APIResponse(GenericModel, Generic[T]):
     data: Optional[T]
 
 
-@router.get("/", response_model=userController.IGetAllUsers)
-def get_users():
-    return userController.getAllUsers()
-
-
 @router.post("/createEmployee", response_model=APIResponse[Employee])
-def create_employee(data: EmployeeCreate):
+def create_employee(data: Employee):
     return controller.addEmployee(data)
 
 
@@ -32,6 +27,11 @@ def list_employees():
     return controller.getAllEmployees()
 
 
-@router.put("/update/{id}")
-def update_employees(id: int, data: EmployeeUpdate):
+@router.put("/update/{id}", response_model=APIResponse[Employee])
+def update_employees(id: int, data: Employee):
     return controller.updateEmployee(id, data)
+
+
+@router.get("/get/{id}", response_model=APIResponse[Employee])
+def get_employee(id: int):
+    return controller.getEmployee(id)
