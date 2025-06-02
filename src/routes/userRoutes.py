@@ -1,8 +1,6 @@
-from src.controllers import userController
 from fastapi import APIRouter
 from src.models.employee import Employee
 from src.controllers import employeeController as controller
-from pydantic import BaseModel
 from typing import Generic, TypeVar, Optional, List
 from pydantic.generics import GenericModel
 
