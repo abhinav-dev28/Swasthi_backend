@@ -6,7 +6,15 @@ from sqlmodel import SQLModel
 from pathlib import Path
 from alembic import context
 
-from src.models.employee import Employee  # Import your SQLModel models here
+# Import your all SQLModel models here
+from src.models.employee import Employee
+from src.models.user import (
+    P2PTransfer,
+    Balance,
+    LockedBalance,
+    OnRampTransaction,
+    User,
+)
 
 import os
 import sys
