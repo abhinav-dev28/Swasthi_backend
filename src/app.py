@@ -18,7 +18,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 app.get("/", tags=["Root"])(
-    lambda: {"message": "Welcome to Swasthi Backend with Docker !"}
+    lambda: {"message": "Welcome to Swasthi Backend with Docker !!"}
 )
 
 # Register routes
