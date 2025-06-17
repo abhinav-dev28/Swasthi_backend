@@ -8,13 +8,6 @@ from alembic import context
 
 # Import your all SQLModel models here
 from src.models.employee import Employee
-from src.models.user import (
-    P2PTransfer,
-    Balance,
-    LockedBalance,
-    OnRampTransaction,
-    User,
-)
 
 import os
 import sys
@@ -26,15 +19,16 @@ load_dotenv()
 sys.path.append(str(Path(__file__).resolve().parent.parent / "src"))
 
 # Import your Pydantic settings
-from config.connection import (
-    connection_string,
+from src.config.settings import (
+    settings,
 )  # not src.config... since we're inside alembic dir
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 # Set DB URL from settings
 config = context.config
-config.set_main_option("sqlalchemy.url", connection_string)
+escaped_url = settings.database_url.replace("%", "%%")
+config.set_main_option("sqlalchemy.url", escaped_url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

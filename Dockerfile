@@ -1,20 +1,27 @@
-# Step 1: Use a slim Python image
+# Use a smaller base image to keep final image lightweight
 FROM python:3.11-slim
 
-# Step 2: Set working directory inside the container
-WORKDIR /app
+# Set environment variables early (before installing anything)
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app
 
-# Step 3: Copy requirements and install dependencies
+# Create working directory
+WORKDIR /app    
+
+# Pre-install system dependencies (like gcc, libpq if needed)
+# RUN apt-get update && apt-get install -y build-essential
+
+# Install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Step 4: Copy your FastAPI app source code
+# Copy the rest of the application
 COPY . .
 
-# Step 5: Environment settings
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-ENV PYTHONPATH=/app
+# Use non-root user (optional for security)
+# RUN useradd -m appuser && chown -R appuser /app
+# USER appuser
 
-# Step 6: Start FastAPI server
-CMD ["uvicorn", "src.app:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# Set default command to start FastAPI server
+CMD ["uvicorn", "src.app:app", "--host", "0.0.0.0", "--port", "8000","--reload"]

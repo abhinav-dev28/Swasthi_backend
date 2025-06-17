@@ -1,7 +1,6 @@
-from sqlmodel import SQLModel, create_engine
+from typing import Generator
+from sqlmodel import SQLModel, Session, create_engine
 from src.config.settings import settings
-
-# print("OG connection :", settings.database_url)
 
 engine = create_engine(
     settings.database_url,
@@ -10,10 +9,14 @@ engine = create_engine(
     pool_size=5,
     # echo=True,     used for debugging, can be removed in production
 )
-# print("Database engine created with URL:", settings.database_url)
 
 
-def init_db():
+def get_session() -> Generator[Session, None, None]:
+    with Session(engine) as session:
+        yield session
+
+
+def init_db() -> None:
     try:
         print("Connecting to DB...")
         SQLModel.metadata.create_all(engine)

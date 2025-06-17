@@ -1,119 +1,111 @@
+from typing import Any
+from fastapi import HTTPException
 from src.models.employee import Employee
-from src.config.connection import engine
 from sqlmodel import Session, select
-from fastapi import HTTPException, status
-from fastapi.responses import JSONResponse
-from src.utils.response import standard_response as standard
+from src.utils.response import APIException, success_response
 
 
-def addEmployee(data: Employee):
+def get_employee_by_id(session: Session, id: int) -> Any:
     try:
-        with Session(engine) as session:
-            employee = Employee(**data.model_dump())
-            session.add(employee)
-            session.commit()
-            session.refresh(employee)
-            return standard(
-                status_code=status.HTTP_201_CREATED,
-                success=True,
-                message="Employee Added",
-                data=employee,
+        employee = session.get(Employee, id)
+
+        if not employee:
+            raise APIException(
+                message="Employee not found", code="EMPLOYEE_NOT_FOUND", status_code=404
             )
 
+        return success_response(
+            "Employee fetched successfully", data=employee, status_code=200
+        )
+
+    except APIException as e:
+        raise e  # Let FastAPI handle this using your custom exception handler
+
     except Exception as e:
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={
-                "success": False,
-                "message": f"An error occurred while adding the employee: {str(e)}",
-            },
+        raise APIException(
+            message="Internal Server Error",
+            code="UNEXPECTED_ERROR",
+            status_code=500,
+            details=str(e),
         )
 
 
-def updateEmployee(id: int, data: Employee):
+def add_employee(session: Session, data: Employee) -> Any:
     try:
-        with Session(engine) as session:
-            employee = session.get(Employee, id)
+        new_employee = Employee(**data.model_dump())
+        session.add(new_employee)
+        session.commit()
+        session.refresh(new_employee)
 
-            if not employee:
-                return JSONResponse(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    content={
-                        "success": False,
-                        "message": "Employee Not found",
-                    },
-                )
+        # Return successful response
+        return success_response(
+            message="Employee created successfully",
+            status_code=201,
+            # data=employee).model_dump(),
+        )
 
-            for key, value in data.model_dump(exclude_unset=True).items():
-                setattr(employee, key, value)
+    except Exception as e:
+        raise APIException(
+            message="Failed to create employee",
+            code="EMPLOYEE_CREATION_FAILED",
+            status_code=500,
+            details=str(e),
+        )
+
+
+def updateEmployee(session: Session, id: int, data: Employee) -> Any:
+    try:
+        employee = session.get(Employee, id)
+        if not employee:
+            raise APIException(
+                message="Employee Not found", code="EMPLOY_NOT_FOUND", status_code=404
+            )
+
+        for key, value in data.model_dump(exclude_unset=True).items():
+            setattr(employee, key, value)
 
             session.add(employee)
             session.commit()
             session.refresh(employee)
 
-            return standard(
-                status_code=status.HTTP_200_OK,
-                success=True,
-                message="Employee Updated",
-                data=employee,
-            )
+        return success_response(
+            "Employee updated successfully", data=employee, status_code=200
+        )
 
     except HTTPException as e:
         raise e  # Let existing HTTPException pass through
 
     except Exception as e:
-        raise HTTPException(
+        raise APIException(
+            message="Internal Server Error",
+            code="UNEXPECTED_ERROR",
             status_code=500,
-            detail=f"An error occurred while updating the employee: {str(e)}",
+            details=str(e),
         )
 
 
-def getAllEmployees():
+def getAllEmployees(session: Session) -> Any:
     try:
-        with Session(engine) as session:
-            statement = select(Employee)
-            results = session.exec(statement).all()
+        statement = select(Employee)
+        results = session.exec(statement).all()
 
-            if not results:
-                return standard(
-                    status_code=404, success=False, message="No employees found"
-                )
-
-            return standard(
-                status_code=200,
-                success=True,
-                message="List of employees",
-                data=results,
-                # data=[emp.model_dump() for emp in results],
+        if not results:
+            return APIException(
+                message="No employees found", code="NO_EMPLOYEE_FOUND", status_code=404
             )
-    except Exception as e:
-        return standard(
-            status_code=500, success=False, message=f"Something went wrong: {str(e)}"
+
+        return success_response(
+            "List of employees",
+            data=results,
+            status_code=200,
         )
-
-
-def getEmployee(id: int):
-    try:
-        with Session(engine) as session:
-            employee = session.get(Employee, id)
-            if not employee:
-                return standard(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    success=False,
-                    message="Employee not found",
-                )
-            return standard(
-                status_code=status.HTTP_200_OK,
-                success=True,
-                message="Employee found",
-                data=employee,
-            )
-
     except HTTPException as e:
-        return JSONResponse(
-            status_code=e.status_code,
-            content={
-                "success": False,
-                "message": f"An error occurred while getting     the employee: {str(e)}",
-            },
+        raise e  # Let existing HTTPException pass through
+
+    except Exception as e:
+        raise APIException(
+            message="Internal Server Error",
+            code="UNEXPECTED_ERROR",
+            status_code=500,
+            details=str(e),
         )
